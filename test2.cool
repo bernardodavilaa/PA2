@@ -1,0 +1,5 @@
+let flag : Bool <- true in
+{
+  msg : String <- "Hello, COOL!";
+  flag <- false;
+};

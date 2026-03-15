@@ -1,0 +1,516 @@
+(* 
+   test_full.cool - Arquivo de teste completo do analisador léxico COOL
+   Criado por: Bernardo
+   
+   Este arquivo contém:
+   - Todos os tokens válidos da linguagem COOL
+   - Todos os casos de erro possíveis do lexer
+   - Cobertura de 100% das funcionalidades do analisador léxico
+*)
+
+(* ============================================
+   PARTE 1: TOKENS VÁLIDOS - CASOS DE SUCESSO
+   ============================================ *)
+
+(* Teste de comentários simples *)
+(* Este é um comentário de uma linha *)
+
+(* Este é um comentário
+   de múltiplas
+   linhas *)
+
+(* Teste de comentários aninhados *)
+(* Nível 1 (* Nível 2 (* Nível 3 *) fim 2 *) fim 1 *)
+
+(* ============================================
+   Classe base com todos os tipos de atributos
+   ============================================ *)
+class BaseClass {
+    (* Atributos sem inicialização *)
+    attr_int : Int;
+    attr_bool : Bool;
+    attr_string : String;
+    attr_object : Object;
+    
+    (* Atributos com inicialização *)
+    counter : Int <- 0;
+    flag : Bool <- true;
+    another_flag : Bool <- false;
+    message : String <- "Hello World";
+    
+    (* Método simples retornando self *)
+    init() : SELF_TYPE {
+        self
+    };
+    
+    (* Método com parâmetros *)
+    setCounter(new_val : Int) : Int {
+        {
+            counter <- new_val;
+            counter;
+        }
+    };
+    
+    (* Método demonstrando operadores aritméticos *)
+    arithmetic(a : Int, b : Int) : Int {
+        {
+            a + b;
+            a - b;
+            a * b;
+            a / b;
+            ~a;
+        }
+    };
+    
+    (* Método demonstrando operadores de comparação *)
+    compare(x : Int, y : Int) : Bool {
+        {
+            x = y;
+            x < y;
+            x <= y;
+            not (x = y);
+        }
+    };
+};
+
+(* ============================================
+   Teste de herança com inherits
+   ============================================ *)
+class DerivedClass inherits BaseClass {
+    extra : String <- "Derived attribute";
+    
+    (* Sobrescrita de método *)
+    init() : SELF_TYPE {
+        {
+            counter <- 100;
+            self;
+        }
+    };
+};
+
+(* ============================================
+   Teste de estruturas de controle: IF
+   ============================================ *)
+class ConditionalTest {
+    (* If simples *)
+    testIf(val : Int) : String {
+        if val = 0 then
+            "zero"
+        else
+            "not zero"
+        fi
+    };
+    
+    (* If aninhado *)
+    testNestedIf(x : Int) : String {
+        if x < 0 then
+            "negative"
+        else
+            if x = 0 then
+                "zero"
+            else
+                if x <= 10 then
+                    "small"
+                else
+                    "large"
+                fi
+            fi
+        fi
+    };
+};
+
+(* ============================================
+   Teste de estruturas de controle: WHILE
+   ============================================ *)
+class LoopTest {
+    count : Int <- 0;
+    
+    testWhile(limit : Int) : Int {
+        {
+            count <- 0;
+            while count < limit loop
+                count <- count + 1
+            pool;
+            count;
+        }
+    };
+    
+    testNestedLoop() : Int {
+        {
+            let i : Int <- 0 in
+                while i < 5 loop
+                    {
+                        let j : Int <- 0 in
+                            while j < 3 loop
+                                j <- j + 1
+                            pool;
+                        i <- i + 1;
+                    }
+                pool;
+            0;
+        }
+    };
+};
+
+(* ============================================
+   Teste de LET
+   ============================================ *)
+class LetTest {
+    (* Let com uma variável *)
+    testLetSingle() : Int {
+        let x : Int <- 10 in
+            x + 5
+    };
+    
+    (* Let com múltiplas variáveis *)
+    testLetMultiple() : String {
+        let str1 : String <- "Hello",
+            str2 : String <- " ",
+            str3 : String <- "World"
+        in
+            str1.concat(str2.concat(str3))
+    };
+    
+    (* Let sem inicialização *)
+    testLetNoInit() : Int {
+        let val : Int in
+            val
+    };
+    
+    (* Let aninhado *)
+    testLetNested() : Int {
+        let a : Int <- 1 in
+            let b : Int <- 2 in
+                let c : Int <- 3 in
+                    a + b + c
+    };
+};
+
+(* ============================================
+   Teste de CASE
+   ============================================ *)
+class CaseTest {
+    testCase(obj : Object) : String {
+        case obj of
+            i : Int => "Integer";
+            s : String => "String";
+            b : Bool => "Boolean";
+            o : Object => "Object";
+        esac
+    };
+    
+    testCaseComplex(val : Object) : Int {
+        case val of
+            num : Int => num + 10;
+            text : String => text.length();
+            other : Object => 0;
+        esac
+    };
+};
+
+(* ============================================
+   Teste de ISVOID
+   ============================================ *)
+class VoidTest {
+    maybe_null : Object;
+    
+    testIsVoid() : Bool {
+        isvoid maybe_null
+    };
+    
+    testIsVoidInCondition(obj : Object) : String {
+        if isvoid obj then
+            "null object"
+        else
+            "valid object"
+        fi
+    };
+};
+
+(* ============================================
+   Teste de NEW
+   ============================================ *)
+class NewTest {
+    obj1 : BaseClass;
+    obj2 : DerivedClass;
+    
+    createObjects() : SELF_TYPE {
+        {
+            obj1 <- new BaseClass;
+            obj2 <- new DerivedClass;
+            self;
+        }
+    };
+    
+    (* Criação com inicialização inline *)
+    testNewInline() : Int {
+        (new BaseClass).setCounter(42)
+    };
+};
+
+(* ============================================
+   Teste de IO
+   ============================================ *)
+class IOTest inherits IO {
+    testOutput() : Object {
+        {
+            out_string("Test message\n");
+            out_int(123);
+            out_string("\n");
+            self;
+        }
+    };
+    
+    testInput() : String {
+        {
+            out_string("Enter input: ");
+            in_string();
+        }
+    };
+};
+
+(* ============================================
+   Teste de Strings com escape sequences
+   ============================================ *)
+class StringTest {
+    (* String vazia *)
+    empty : String <- "";
+    
+    (* String com escapes *)
+    testEscapes() : String {
+        "Line1\nLine2\tTabbed\bBackspace\fFormfeed"
+    };
+    
+    (* String com aspas e backslash *)
+    testQuotes() : String {
+        "Quote: \" and Backslash: \\"
+    };
+    
+    (* String com \0 (backslash-zero, não null byte) *)
+    testBackslashZero() : String {
+        "Before\0After"
+    };
+    
+    (* String com espaços *)
+    testSpaces() : String {
+        "   spaces   everywhere   "
+    };
+    
+    (* Métodos de string *)
+    testStringMethods() : Int {
+        {
+            let s : String <- "Hello" in
+            {
+                s.length();
+                s.concat(" World");
+                s.substr(0, 2);
+                0;
+            };
+        }
+    };
+};
+
+(* ============================================
+   Teste de números inteiros
+   ============================================ *)
+class IntTest {
+    (* Literais inteiros diversos *)
+    zero : Int <- 0;
+    one : Int <- 1;
+    large : Int <- 999999999;
+    
+    testIntegers() : Int {
+        {
+            let n1 : Int <- 42 in n1;
+            let n2 : Int <- 100 in n2;
+            let n3 : Int <- 12345 in n3;
+            0;
+        }
+    };
+};
+
+(* ============================================
+   Teste de booleanos
+   ============================================ *)
+class BoolTest {
+    t : Bool <- true;
+    f : Bool <- false;
+    
+    testBool(x : Bool, y : Bool) : Bool {
+        {
+            not x;
+            not y;
+            not (x = y);
+        }
+    };
+};
+
+(* ============================================
+   Teste de todos os operadores
+   ============================================ *)
+class OperatorTest {
+    (* Delimitadores: ( ) { } ; : , . *)
+    testDelimiters(a : Int, b : Int) : Int {
+        {
+            (a + b);
+        }
+    };
+    
+    (* Operador @ *)
+    testDispatch(obj : Object) : Object {
+        obj@Object.copy()
+    };
+    
+    (* Operador ~ (negação unária) *)
+    testNegation(x : Int) : Int {
+        ~x
+    };
+    
+    (* Todos operadores aritméticos: + - * / *)
+    testArithmetic(a : Int, b : Int) : Int {
+        a + b - a * b / a
+    };
+    
+    (* Todos operadores de comparação: = < <= *)
+    testComparison(x : Int, y : Int) : Bool {
+        x = y
+    };
+    
+    (* Operador de atribuição: <- *)
+    testAssignment(val : Int) : Int {
+        {
+            let temp : Int in
+            {
+                temp <- val;
+                temp;
+            };
+        }
+    };
+    
+    (* Operador de case: => *)
+    testCaseArrow(obj : Object) : String {
+        case obj of
+            i : Int => "int";
+        esac
+    };
+};
+
+(* ============================================
+   Teste de identificadores
+   ============================================ *)
+class IdentifierTest {
+    (* TYPEID: começa com maiúscula *)
+    MyType : Int;
+    AnotherType : String;
+    Type123 : Bool;
+    TYPE_WITH_UNDERSCORE : Object;
+    
+    (* OBJECTID: começa com minúscula *)
+    myVar : Int;
+    anotherVar : String;
+    var123 : Bool;
+    var_with_underscore : Object;
+    
+    testIdentifiers() : Int {
+        {
+            let localVar : Int <- 0,
+                another_local : Int <- 1,
+                var123abc : Int <- 2
+            in
+                localVar + another_local + var123abc;
+        }
+    };
+};
+
+(* ============================================
+   Teste de palavras-chave case insensitive
+   ============================================ *)
+Class CaseInsensitiveTest Inherits IO {
+    attr : Int <- 0;
+    
+    testKeywords() : SELF_TYPE {
+        {
+            If attr = 0 Then
+                WhILe attr < 10 LOOp
+                    attr <- attr + 1
+                PoOl
+            eLse
+                attr <- 0
+            FI;
+            
+            CaSe attr Of
+                x : Int => x;
+            EsAc;
+            
+            LeT temp : Int <- NeW Int In
+                temp;
+            
+            If IsVoid temp ThEn
+                NoT tRUe
+            eLsE
+                fAlSe
+            Fi;
+            
+            self;
+        }
+    };
+};
+
+(* ============================================
+   PARTE 2: CASOS DE ERRO
+   ============================================ *)
+
+class ErrorTests {
+    (* ERRO 1: String não terminada - esqueceu fechar aspas *)
+    error1() : String {
+        "String sem fechamento
+    };
+    
+    (* ERRO 2: Caracteres inválidos *)
+    error2() : Int {
+        10 # 5  (* # é inválido *)
+    };
+    
+    error3() : Int {
+        20 $ 10  (* $ é inválido *)
+    };
+    
+    error4() : Int {
+        30 ^ 2  (* ^ é inválido *)
+    };
+    
+    error5() : Int {
+        5 % 3  (* % é inválido *)
+    };
+    
+    error6() : String {
+        "test" & "string"  (* & é inválido *)
+    };
+    
+    error7() : Int {
+        1 | 2  (* | é inválido *)
+    };
+    
+    (* ERRO 8: String muito longa (mais de 1024 caracteres) *)
+    error8() : String {
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    };
+    
+    (* ERRO 9: String com null character (byte 0) *)
+    error9() : String {
+        "string com null"
+    };
+};
+
+(* ERRO 10: Comentário não balanceado *)
+class UnbalancedComment {
+    test() : Int {
+        10 *) 20
+    };
+};
+
+(* ERRO 11: EOF em comentário 
+   Este comentário não será fechado propositalmente...
+(*
+    Comentário aberto até o fim do arquivo
+    para testar detecção de EOF em comentário

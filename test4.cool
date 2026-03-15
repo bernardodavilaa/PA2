@@ -1,0 +1,2 @@
+(* Isto é um comentário *)
+x <- 42;  (* comentário dentro do código *)
