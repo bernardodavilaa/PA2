@@ -18,6 +18,9 @@ static int string_buf_len;
 /* Contador para comentarios aninhados */
 static int comment_depth = 0;
 
+/* Flag para indicar erro de null character em string */
+static int string_contains_null = 0;
+
 /* Funcao auxiliar para adicionar caractere ao buffer */
 static void add_to_string(char c) {
     if (string_buf_len >= 1024) {
@@ -37,6 +40,9 @@ static void add_to_string(char c) {
 
  /* Nova linha */
 \n              { curr_lineno++; }
+
+ /* Comentario de linha */
+"--".*          ;
 
  /* Inicio de comentario */
 "(*"            { comment_depth = 1; BEGIN(COMMENT); }
@@ -133,12 +139,17 @@ f(?i:alse)      { cool_yylval.boolean = 0; return BOOL_CONST; }
 \"              {
                   string_buf_ptr = string_buf;
                   string_buf_len = 0;
+                  string_contains_null = 0;
                   BEGIN(STRING);
                 }
 
 <STRING>{
     \"          {
                   BEGIN(INITIAL);
+                  if (string_contains_null) {
+                      cool_yylval.error_msg = "String contains null character";
+                      return ERROR;
+                  }
                   if (string_buf_len >= 1024) {
                       cool_yylval.error_msg = "String constant too long";
                       return ERROR;
@@ -151,19 +162,20 @@ f(?i:alse)      { cool_yylval.boolean = 0; return BOOL_CONST; }
     \n          {
                   BEGIN(INITIAL);
                   curr_lineno++;
+                  string_contains_null = 0;
                   cool_yylval.error_msg = "Unterminated string constant";
                   return ERROR;
                 }
     
     <<EOF>>     {
                   BEGIN(INITIAL);
+                  string_contains_null = 0;
                   cool_yylval.error_msg = "EOF in string constant";
                   return ERROR;
                 }
     
     \0          {
-                  cool_yylval.error_msg = "String contains null character";
-                  /* Continuar ate o fim da string */
+                  string_contains_null = 1;
                 }
     
     \\n         { add_to_string('\n'); }
